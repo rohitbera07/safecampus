@@ -1,6 +1,6 @@
 import React from 'react';
 import contact from '../assets/contact.png';
-import AnimatedBackground from './Animatedbackground';
+import AnimatedBackground from './AnimatedBackground';
 
 const Bottom = () => {
   return (
