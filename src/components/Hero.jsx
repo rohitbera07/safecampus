@@ -1,6 +1,5 @@
 import React from 'react'
-import Lottie from 'lottie-react';
-import animationData from '../assets/animations/1MpOlcwm93.json'
+
 import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
