@@ -1,54 +1,77 @@
 import React from 'react';
-import contact from '../assets/contact.png';
 import AnimatedBackground from './AnimatedBackground';
 
 const Bottom = () => {
   return (
-    <div className="bg-zinc-900 bg-opacity-90  rounded-lg shadow-lg w-full mt-2 mx-auto min-h-screen p-6 animate-fadeIn">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-100">Contact Us</h2>
+    <div className="bg-zinc-100 text-gray-800 rounded-lg shadow-2xl w-full mt-8 mx-auto min-h-screen px-6 py-12">
+      <h2 className="text-4xl font-extrabold mb-12 text-center text-green-700">Contact Us</h2>
 
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-        {/* Image Section */}
-       
-
+      <div className="flex flex-col-reverse md:flex-row items-center justify-center gap-12">
         {/* Form Section */}
-        <form className="w-full md:w-2/6 space-y-5 z-99">
-          <div>
-            <label className="block text-gray-100 mb-1">Name</label>
+        <form className="w-11/12 md:w-2/5 border-slate-100 border-solid border-[2px] shadow-2xl rounded bg-slate-100 p-4 space-y-6">
+          {/* Name */}
+          <div className="relative">
             <input
               type="text"
+              id="name"
+              required
+              className="peer w-full border-b-2  border-gray-300 focus:border-green-600 outline-none py-7 px-1 bg-transparent placeholder-transparent"
               placeholder="Your Name"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+            <label
+              htmlFor="name"
+              className="absolute left-1 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-sm peer-focus:text-green-700"
+            >
+              Name
+            </label>
           </div>
 
-          <div>
-            <label className="block text-gray-100 mb-1">Email</label>
+          {/* Email */}
+          <div className="relative">
             <input
               type="email"
+              id="email"
+              required
+              className="peer w-full border-b-2 border-gray-300 focus:border-green-600 outline-none py-7 px-1 bg-transparent placeholder-transparent"
               placeholder="you@example.com"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+            <label
+              htmlFor="email"
+              className="absolute left-1 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-sm peer-focus:text-green-700"
+            >
+              Email
+            </label>
           </div>
 
-          <div>
-            <label className="block text-gray-100 mb-1">Message</label>
+          {/* Message */}
+          <div className="relative">
             <textarea
+              id="message"
               rows="4"
+              required
+              className="peer w-full border-b-2 border-gray-300 focus:border-green-600 outline-none py-7 px-1 bg-transparent placeholder-transparent resize-none"
               placeholder="Your message..."
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             ></textarea>
+            <label
+              htmlFor="message"
+              className="absolute left-1 top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-sm peer-focus:text-green-700"
+            >
+              Message
+            </label>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-zinc-100 text-black py-3 rounded-md hover:bg-zinc-200 transition duration-300"
+            className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition duration-300 font-semibold shadow-md"
           >
             Send Message
           </button>
         </form>
-         <div className="w-full md:w-1/2 ">
-        <AnimatedBackground/>
+
+        {/* Animation */}
+        <div className="w-full md:w-1/2">
+          <AnimatedBackground />
         </div>
       </div>
     </div>

@@ -11,8 +11,8 @@ const steps = [
 
 const Work = () => {
   return (
-    <div className="h-full w-10/12 p-4 md:p-6 bg-zinc-700 rounded-xl m-1">
-      <h2 className="text-zinc-50 font-jua text-3xl md:text-5xl  tracking-wide">
+    <div className="h-full w-10/12 p-4 md:p-6 rounded-xl m-1">
+      <h2 className="text-green-800 font-sans text-3xl md:text-5xl  tracking-wide">
         HOW IT WORKS ?
       </h2>
 

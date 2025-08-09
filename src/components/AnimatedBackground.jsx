@@ -63,7 +63,7 @@ const AnimatedBackground = () => {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col sm:flex-row items-center justify-center gap-8 p-8"
+      className=" flex-col hidden md:flex sm:flex-row items-center justify-center gap-8 p-8"
     >
       {emojis.map((src, index) => (
         <div
