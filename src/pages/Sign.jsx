@@ -12,6 +12,7 @@ const variants = {
 const Sign = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name:'', email:'', password:'', role:'', adminKey:'', mobile1:'', mobile2:''
   });
@@ -31,10 +32,40 @@ const Sign = () => {
 
   const back = () => setStep(s => Math.max(0, s-1));
 
-  const submit = () => {
-    toast.success('Signup success');
-    console.log(formData);
-    navigate('/login');
+  const submit = async () => {
+    if (formData.role === "admin" && formData.adminKey !== "1305") {
+      toast.error("Wrong admin key ❌");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          mobile1: formData.role === "student" ? formData.mobile1 : undefined,
+          mobile2: formData.role === "student" ? formData.mobile2 : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.message || "Signup failed");
+        return;
+      }
+
+      toast.success("Signup success ✅");
+      navigate("/login");
+    } catch (err) {
+      toast.error("Server error, try again later");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = e => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -42,12 +73,9 @@ const Sign = () => {
   const stepCount = 4;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-100 via-purple-200 to-gray-300 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-100 via-blue-200 to-gray-300 p-4">
       <Toaster position="top-center" />
       <div className="w-full max-w-lg bg-white rounded-xl p-8 shadow-2xl overflow-hidden relative">
-
-       
-
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -58,7 +86,7 @@ const Sign = () => {
           >
             {step===0 && (
               <div className="text-center space-y-4 pt-12">
-                <h2 className="text-3xl font-bold text-purple-600">Welcome aboard</h2>
+                <h2 className="text-3xl font-bold text-blue-600">Welcome aboard</h2>
                 <p>Select your role to begin</p>
                 <select
                   name="role"
@@ -95,9 +123,15 @@ const Sign = () => {
               <div className="text-center space-y-4 pt-12">
                 <h2 className="text-2xl font-bold text-purple-600">All set!</h2>
                 <p>Click submit to complete signup.</p>
-                <button onClick={submit} className="w-full py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">Submit</button>
+                <button
+                  onClick={submit}
+                  disabled={loading}
+                  className="w-full py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {loading ? "Submitting..." : "Submit"}
+                </button>
                 <p className="mt-4 text-sm">
-                  Already have an account?{' '}
+                  Already have an account?{" "}
                   <span onClick={()=>navigate('/login')} className="text-purple-600 hover:underline cursor-pointer">
                     Login here
                   </span>
@@ -111,15 +145,6 @@ const Sign = () => {
           {step > 0 && <button onClick={back} className="text-gray-600 hover:text-gray-800">← Back</button>}
           {step < stepCount - 1 && <button onClick={next} className="ml-auto text-purple-600 hover:text-purple-800">Next →</button>}
         </div>
-        <p className="mt-6 text-center text-sm text-gray-600">
-  Already have an account?{' '}
-  <span
-    onClick={() => navigate('/login')}
-    className="text-purple-600 hover:underline cursor-pointer"
-  >
-    Login here
-  </span>
-</p>
       </div>
     </div>
   );

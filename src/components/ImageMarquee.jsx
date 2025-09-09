@@ -1,39 +1,30 @@
 import React from "react";
 
-const images = [
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png", // repeat to simulate infinite
-  "./4.png",
-   "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png",
-  "./4.png", // repeat to simulate infinite
-  "./4.png",
+const bulletPoints = [
+  "Stay alert and aware of surroundings",
+  "Walk in well-lit areas at night",
+  "Share travel plans with trusted friends",
+  "Use campus security resources",
+  "Take preventative safety measures",
+  "Trust your instincts and avoid risky areas",
+  "Report suspicious activity immediately",
 ];
 
-const ImageMarquee = () => {
+const InfoMarquee = () => {
   return (
-    <div className="overflow-hidden whitespace-nowrap py-10 px-8 bg-white group">
+    <div className="overflow-hidden whitespace-nowrap py-3 px-8 bg-white group">
       <div className="inline-block animate-marquee group-hover:[animation-play-state:paused] group-active:[animation-play-state:paused]">
-        {images.map((src, idx) => (
-          <img
+        {bulletPoints.map((point, idx) => (
+          <span
             key={idx}
-            src={src}
-            alt={`logo-${idx}`}
-            className="inline-block h-16 mx-6"
-          />
+            className="inline-flex items-center text-2xl text-sky-600 font-medium mx-6"
+          >
+            • {point}
+          </span>
         ))}
       </div>
     </div>
   );
 };
 
-export default ImageMarquee;
+export default InfoMarquee;

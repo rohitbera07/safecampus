@@ -11,8 +11,8 @@ const steps = [
 
 const Work = () => {
   return (
-    <div className="h-full w-10/12 p-4 md:p-6 rounded-xl m-1">
-      <h2 className="text-green-800 font-sans text-3xl md:text-5xl  tracking-wide">
+    <div className="h-9/12 w-10/12 p-4 md:p-6 rounded-xl m-1">
+      <h2 className="text-blue-500 font-sans text-3xl md:text-5xl  tracking-wide">
         HOW IT WORKS ?
       </h2>
 
@@ -35,7 +35,7 @@ const Work = () => {
               viewport={{ once: true }}
               className="text-zinc-100 text-xl md:text-2xl bg-zinc-800 p-4 rounded-lg shadow-lg border border-zinc-700"
             >
-              <span className="text-lime-400 font-semibold mr-2">Step {index + 1}:</span>
+              <span className="text-blue-500 font-semibold mr-2">Step {index + 1}:</span>
               {step}
             </motion.div>
           ))}

@@ -9,7 +9,7 @@ const Footer = () => {
         <p className="text-sm text-center md:text-left">
           &copy; {new Date().getFullYear()} Your Company. All rights reserved.
         </p>
-        <p className="text-sm text-center">RB</p>
+
         <div className="flex space-x-6 mt-4 md:mt-0">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition duration-300">
             <FaFacebook size={20} />

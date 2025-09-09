@@ -1,126 +1,285 @@
-import React, { useState } from 'react';
-import ModalForm from '../components/ModelForm';
+import React, { useState, useEffect } from "react";
+import CampusHeatmap from "../components/CampusHeatmap";
 
-const Student = () => {
-  const [modalOpen, setModalOpen] = useState(false);
- const [isModalOpen, setIsModalOpen] = useState(false);
+export default function StudentDashboard() {
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
+ const [showMap, setShowMap] = useState(false);
+  // Report form state
+  const [reportData, setReportData] = useState({
+    description: "",
+    area: "",
+  });
 
-  const handleSendAlert = () => {
-    // Add your SOS alert sending logic here
-    alert('🚨 SOS alert sent!');
-    setIsModalOpen(false);
+  // Call form state
+  const [sosData, setSosData] = useState({
+    description: "",
+    area: "",
+  });
+
+  // Profile (from login response stored in localStorage)
+ 
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setProfile({ name: user.name, role: user.role, email: user.email });
+    }
+  }, []);
+
+  // Handle changes
+  const handleReportChange = (e) => {
+    setReportData({ ...reportData, [e.target.name]: e.target.value });
   };
+const handleCallChange = (e) => {
+  const { name, value } = e.target;
+  setSosData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+  // Submit Report Complaint
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:5000/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...reportData, email: localStorage.email }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Report submitted successfully!");
+        setShowReportModal(false);
+        setReportData({ description: "", area: "" });
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong!");
+    }
+  };
+
+  // Submit Voice Call Request
+  const handleSOSSubmit = (e) => {
+  e.preventDefault();
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      try {
+        const res = await fetch("http://localhost:5000/sos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: localStorage.name,      // from localStorage
+            description: sosData.description,
+            area: sosData.area,
+            latitude,
+            longitude,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("🚨 SOS sent successfully!");
+          setSosData({ description: "", area: "" }); // for call form
+          setShowCallModal(false); // close call modal
+
+        } else {
+          alert(data.error || "Failed to send SOS");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Something went wrong!");
+      }
+    });
+  } else {
+    alert("Geolocation is not supported by this browser.");
+  }
+};
+
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#1E1E2F] text-[#F2F2F2]">
-      {/* Sidebar */}
-      <aside className="w-full md:px-8 md:py-14 md:w-16 h-16 md:h-auto flex md:flex-col items-center bg-[#2C2C3C] justify-center shadow-md">
-        <div className="w-10 h-10 rounded-full bg-[#4E9FEE] font-jua flex justify-center items-center">R</div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6">
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-6 md:gap-y-24 gap-6">
-          {/* Greeting */}
-          <div className="h-40 rounded-xl shadow-md bg-[url('/7.jpg')] bg-cover bg-center text-white text-3xl font-jua pt-8 px-4 md:col-span-2">
-            Hi User!
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
+      {/* Topbar */}
+      <header className="flex justify-between items-center bg-blue-600 text-white px-6 py-4 rounded-xl shadow">
+        <h1 className="text-2xl font-bold">CampusVoice - Student Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="font-semibold">{localStorage.name}</p>
+            <p className="text-sm">{localStorage.role}</p>
           </div>
-
-          {/* Complaint Report */}
-          <div className="bg-[url('/9.jpg')] bg-cover bg-center h-40 rounded-xl shadow-md p-4 flex flex-col justify-between md:col-span-2">
-            <div className="text-red-100 text-2xl font-jua">Have a complaint? Report below.</div>
-            <div
-              className="w-5/6 m-1 p-1 rounded-xl text-white font-jua cursor-pointer"
-              onClick={() => setModalOpen(true)}
-            >
-              <ModalForm isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-            </div>
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold shadow">
+            {localStorage.name ? localStorage.name[0].toUpperCase() : "U"}
           </div>
- {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-[#1E1E2F] p-6 rounded-xl shadow-lg text-white w-11/12 max-w-sm">
-            <h2 className="text-xl font-bold mb-4">Are you sure?</h2>
-            <p className="mb-6 text-gray-300">Do you really want to send an SOS alert?</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-500 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendAlert}
-                className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 transition"
-              >
-                Send SOS
-              </button>
-            </div>
+        </div>
+      </header>
+
+      {/* Cards Section */}
+      <div className="grid md:grid-cols-2 gap-6 mt-6">
+        {/* Report Complaints */}
+        <div className="bg-gray-100 rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold mb-2">Report Complaints</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Quickly send emergency alerts to your trusted contacts with a single
+            button press. Ensure your safety by notifying them of your location
+            and situation.
+          </p>
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Report
+          </button>
+        </div>
+
+        {/* Voice Calls */}
+        <div className="bg-gray-100 rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold mb-2">SOS</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Initiate voice calls with your contacts directly from the app for
+            immediate communication in urgent situations.
+          </p>
+          <button
+            onClick={() => setShowCallModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            SOS
+          </button>
+        </div>
+      </div>
+
+      {/* Map View */}
+    <div className="bg-gray-100 rounded-xl shadow p-6 mt-6">
+      <h2 className="text-lg font-semibold mb-4">Map View</h2>
+
+      {/* Button to toggle map */}
+      <button
+        onClick={() => setShowMap(!showMap)}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+      >
+        {showMap ? "Hide Map" : "Show Map"}
+      </button>
+
+      {/* Conditional rendering */}
+      {showMap && (
+        <div className="mt-4">
+          <CampusHeatmap />
+        </div>
+      )}
+    </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
+            <h2 className="text-xl font-semibold text-blue-600 mb-4 text-center">
+              Report Complaint
+            </h2>
+
+            <form onSubmit={handleReportSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  value={reportData.description}
+                  onChange={handleReportChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  rows="3"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">Area</label>
+                <input
+                  type="text"
+                  name="area"
+                  value={reportData.area}
+                  onChange={handleReportChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Submit Report
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-         {/* SOS ALERT */}
-<div
-  onClick={() => setIsModalOpen(true)} // ✅ Correct position
-  className="bg-[url('/8.png')] cursor-pointer border border-white
- bg-cover bg-center h-40 rounded-xl shadow-md pt-10 flex flex-col justify-between md:col-span-1"
->
-  {/* Optional inner content like a label or icon */}
-</div>
 
+      {/* Voice Call Modal */}
+      {showCallModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
+            <h2 className="text-xl font-semibold text-blue-600 mb-4 text-center">
+              Make a Call
+            </h2>
 
-        
-          <div className="bg-[#2C2C3C] h-40 text-2xl rounded-xl shadow-md flex justify-center items-center md:col-span-1 md:max-w-[180px]">
-           <div>Map view</div>
-          </div>
+            <form onSubmit={handleSOSSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  value={sosData.description}
+                  onChange={handleCallChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  rows="3"
+                  required
+                />
+              </div>
 
-          {/* Know your admins - always scroll horizontally */}
-          <div className="bg-[#2C2C3C] h-56 rounded-xl shadow-md p-4 md:col-span-3 flex flex-col">
-            <h1 className="m-1 text-white font-mono text-lg mb-3">Know your admins :</h1>
-            <div
-              className="bg-zinc-100 h-32 rounded-xl flex items-center shadow-md px-3 overflow-x-auto no-scrollbar gap-4 whitespace-nowrap"
-            >
-              {[
-                { initial: 'F', name: 'Farookh', bg: '#4E9FEE' },
-                { initial: 'C', name: 'Chahal', bg: '#1b1c1d' },
-                { initial: 'K', name: 'Karan', bg: '#695019' },
-                { initial: 'I', name: 'Inder', bg: '#EE704E' }, // added extras to test scroll
-                { initial: 'N', name: 'Noor', bg: '#4E9FEE' },
-                { initial: 'G', name: 'Gupta', bg: '#695019' },
-              ].map((member) => (
-                <div
-                  key={member.name}
-                  className="flex flex-col items-center inline-block min-w-[72px]"
+              <div>
+                <label className="block text-gray-700 mb-1">Area</label>
+                <input
+                  type="text"
+                  name="area"
+                  value={sosData.area}
+                  onChange={handleCallChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCallModal(false)}
+                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
                 >
-                  <div
-                    className="w-14 h-14 rounded-full font-jua flex justify-center items-center text-white text-xl"
-                    style={{ backgroundColor: member.bg }}
-                  >
-                    {member.initial}
-                  </div>
-                  <span className="mt-1 text-sm font-mono text-[#2C2C3C]">{member.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Notices box */}
-          <div className="bg-[#2C2C3C] h-56 rounded-xl shadow-md p-4 md:col-span-3 flex flex-col">
-            <h1 className="m-1 text-white font-mono text-lg mb-3">Actions Taken by the Campus :</h1>
-            <ul className="list-disc list-inside space-y-2 text-white font-mono text-sm overflow-y-auto max-h-[200px]">
-              <li>Campus will be closed on Friday.</li>
-              <li>Submit assignments by next Monday.</li>
-              <li>New library timings effective immediately.</li>
-              <li>Guest lecture on React next Wednesday.</li>
-              <li>Sports day event postponed to next month.</li>
-            </ul>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Initiate Call
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        {/* Map coming Soon - square */}
+      )}
         
-      </main>
     </div>
   );
-};
-
-export default Student;
+}
