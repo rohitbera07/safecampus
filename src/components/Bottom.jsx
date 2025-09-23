@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
+import side from "../assets/feed.png"
 export default function Bottom() {
   const [formData, setFormData] = useState({
     name: "",
@@ -39,19 +39,19 @@ export default function Bottom() {
   };
 
   return (
-    <section className="w-full min-h-screen bg-zinc-50 px-6 py-16 flex items-center justify-center">
+    <section className="w-full min-h-screen bg-zinc-50 px-6 py-5 flex items-center justify-center">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Left Side - Image */}
         <div className="flex justify-center">
           <img
-            src="/feedback.svg"
+            src={side}
             alt="Feedback illustration"
-            className="rounded-lg shadow-lg w-[500px] h-auto"
+            className="rounded-lg shadow-lg w-[50vw] hidden sm:block h-[90vh] object-cover"
           />
         </div>
 
         {/* Right Side - Feedback Form */}
-        <Card className="w-full max-w-md shadow-xl border border-slate-200">
+        <Card className="w-full h-[90vh] max-w-md shadow-xl border border-slate-200">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center text-blue-600">
               Share Your Feedback

@@ -7,7 +7,7 @@ export default function Hero() {
   return (
     <div className="w-screen flex flex-col md:flex-row min-h-screen">
       {/* Left Text Section */}
-      <section className="relative md:w-[50vw] flex flex-col justify-center items-center ">
+      <section className="relative md:w-[50vw] h-full flex flex-col justify-center items-center ">
         
         {/* Navigation Bar
         <nav className="w-full flex justify-center items-center  mb-8">
