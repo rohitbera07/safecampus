@@ -17,23 +17,11 @@ import Safety from '../components/Safety'
 const App = () => {
   return (
     <div className="  overflow-hidden min-h-screen">
-
-
-      <Hero/>
-
-       <div id='work' className='flex justify-center bg-zinc-50 py-1  min-h-screen'>
+        <Hero/>
         <Work/>
-       </div>
-           <ImageMarquee/>
-     
-    
-         <div id='info' className='w-screen min-h-screen'>
-          <Safety/>
-         </div>
-       <div id='contact' className='  min-h-screen '>
+        <Safety/>
         <Bottom/>
-       </div>
-       <Footer/>
+        <Footer/>
     </div>
   )
 }

@@ -1,74 +1,144 @@
-import React from 'react';
-import AnimatedBackground from './AnimatedBackground';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
-const Bottom = () => {
+export default function Bottom() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Simulated API call
+      await new Promise((resolve, reject) =>
+        setTimeout(() => {
+          Math.random() > 0.3 ? resolve("success") : reject("error");
+        }, 2000)
+      );
+
+      alert("✅ Feedback submitted successfully!");
+    } catch (error) {
+      alert("❌ Something went wrong. Please try again.");
+    } finally {
+      setFormData({ name: "", email: "", message: "" }); // clear form
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-zinc-100 text-gray-800 rounded-lg shadow-2xl w-full mt-5 mx-auto min-h-screen px-6 py-12">
-      <h2 className="text-4xl font-extrabold mb-12 text-center text-blue-500">Feedback</h2>
+    <section className="w-full min-h-screen bg-zinc-50 px-6 py-16 flex items-center justify-center">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        {/* Left Side - Image */}
+        <div className="flex justify-center">
+          <img
+            src="/feedback.svg"
+            alt="Feedback illustration"
+            className="rounded-lg shadow-lg w-[500px] h-auto"
+          />
+        </div>
 
-      <div className="flex flex-col-reverse md:flex-row items-center justify-center gap-12">
-        {/* Form Section */}
-      <form className="w-full max-w-sm border border-slate-200 shadow-md rounded-lg bg-white p-4 md:p-6 space-y-4">
-  {/* Name */}
-  <div className="flex flex-col space-y-1">
-    <label htmlFor="name" className="text-xs font-medium text-gray-700">
-      Name
-    </label>
-    <input
-      type="text"
-      id="name"
-      required
-      className="w-full rounded-md border border-gray-300 focus:border-blue-600 focus:ring-1 focus:ring-green-200 outline-none py-2 px-3 bg-white text-sm"
-      placeholder="Enter your name"
-    />
-  </div>
+        {/* Right Side - Feedback Form */}
+        <Card className="w-full max-w-md shadow-xl border border-slate-200">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center text-blue-600">
+              Share Your Feedback
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div className="space-y-1">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  required
+                  placeholder="Enter your name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-  {/* Email */}
-  <div className="flex flex-col space-y-1">
-    <label htmlFor="email" className="text-xs font-medium text-gray-700">
-      Email
-    </label>
-    <input
-      type="email"
-      id="email"
-      required
-      className="w-full rounded-md border border-gray-300 focus:border-blue-600 focus:ring-1 focus:ring-green-200 outline-none py-2 px-3 bg-white text-sm"
-      placeholder="you@example.com"
-    />
-  </div>
+              {/* Email */}
+              <div className="space-y-1">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-  {/* Message */}
-  <div className="flex flex-col space-y-1">
-    <label htmlFor="message" className="text-xs font-medium text-gray-700">
-      Message
-    </label>
-    <textarea
-      id="message"
-      rows="3"
-      required
-      className="w-full rounded-md border border-gray-300 focus:border-green-600 focus:ring-1 focus:ring-green-200 outline-none py-2 px-3 bg-white text-sm resize-none"
-      placeholder="Your message..."
-    ></textarea>
-  </div>
+              {/* Message */}
+              <div className="space-y-1">
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  id="message"
+                  rows={4}
+                  required
+                  placeholder="Your message..."
+                  value={formData.message}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-  {/* Submit */}
-  <button
-    type="submit"
-    className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300 font-medium shadow-sm text-sm"
-  >
-    Send
-  </button>
-</form>
-
-
-
-
-
-        {/* Animation */}
-        
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                      ></path>
+                    </svg>
+                    Sending...
+                  </span>
+                ) : (
+                  "Send Feedback"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default Bottom;
+}

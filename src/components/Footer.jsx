@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className="bg-gray-900 text-white py-6 animate-slideUp">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
         <p className="text-sm text-center md:text-left">
-          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+          &copy; {new Date().getFullYear()} Campus Voice. All rights reserved.
         </p>
 
         <div className="flex space-x-6 mt-4 md:mt-0">

@@ -12,14 +12,14 @@ const bulletPoints = [
 
 const InfoMarquee = () => {
   return (
-    <div className="overflow-hidden whitespace-nowrap py-3 px-8 bg-white group">
+    <div className="overflow-hidden whitespace-nowrap py-3 px-8 bg-gray-50 group">
       <div className="inline-block animate-marquee group-hover:[animation-play-state:paused] group-active:[animation-play-state:paused]">
         {bulletPoints.map((point, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center text-2xl text-sky-600 font-medium mx-6"
+            className="inline-flex items-center text-4xl text-zinc-600 font-mono mx-6"
           >
-            • {point}
+            |   {point}
           </span>
         ))}
       </div>
