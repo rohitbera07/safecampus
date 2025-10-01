@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
+import logo from "../assets/logo.png";
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -71,8 +71,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-100 via-blue-200 to-gray-300 flex gap-28 items-center justify-center p-6">
-     <h1 className='text-3xl fixed top-4 left-0 mx-10 '>Safe Campus</h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-100 via-zinc-200 to-gray-300 flex gap-28 items-center justify-center p-6">
+     <div className="mb-4">
+               <img src={logo} alt="" className="w-[250px] h-[250px] mx-2"/>
+             </div>
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-md transform transition-all duration-500 hover:scale-[1.02]"
@@ -85,7 +87,7 @@ const Login = () => {
           placeholder="University Email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-400"
         />
 
         <input
@@ -94,13 +96,13 @@ const Login = () => {
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full mb-2 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full mb-2 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-400"
         />
 
         <div className="text-right mb-4">
           <span
             onClick={() => toast('Password recovery not implemented.')}
-            className="text-sm text-blue-600 hover:underline cursor-pointer"
+            className="text-sm text-zinc-600 hover:underline cursor-pointer"
           >
             Forgot password?
           </span>
@@ -109,7 +111,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-300 disabled:opacity-50"
+          className="w-full py-2 bg-zinc-600 hover:bg-zinc-700 text-white rounded-md transition duration-300 disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
@@ -118,7 +120,7 @@ const Login = () => {
           Haven’t registered yet?{' '}
           <span
             onClick={() => navigate('/signup')}
-            className="text-blue-600 hover:underline cursor-pointer"
+            className="text-zinc-600 hover:underline cursor-pointer"
           >
             Sign up
           </span>

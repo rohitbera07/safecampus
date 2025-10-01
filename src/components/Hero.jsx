@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import logo from "../assets/logo.png";
 import side from "../assets/side.png";
-
+import { Link } from 'react-router-dom';
 export default function Hero() {
   return (
     <div className="w-screen flex flex-col md:flex-row min-h-screen">
@@ -25,6 +25,7 @@ export default function Hero() {
 
         {/* Pill banner */}
         <div className="mb-2">
+          <Link to="/login">
           <a
             href="#"
             className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
@@ -32,6 +33,7 @@ export default function Hero() {
             Get yourself login 
             <ArrowRight className="ml-1 h-3 w-3" />
           </a>
+          </Link>
         </div>
 
         {/* Heading */}
@@ -47,9 +49,11 @@ export default function Hero() {
 
         {/* Buttons */}
         <div className="mt-8 flex justify-center gap-4">
+          <Link to="/signup">
           <Button size="lg" className="bg-black text-white hover:bg-black/90">
             Get Started
           </Button>
+          </Link>
         </div>
       </section>
 

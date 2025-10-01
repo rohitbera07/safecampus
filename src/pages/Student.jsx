@@ -107,7 +107,7 @@ const handleCallChange = (e) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
       {/* Topbar */}
-      <header className="flex justify-between items-center bg-blue-600 text-white px-6 py-4 rounded-xl shadow">
+      <header className="flex justify-between items-center bg-slate-700 text-white px-6 py-4 rounded-xl shadow">
         <h1 className="text-2xl font-bold">CampusVoice - Student Dashboard</h1>
         <div className="flex items-center gap-4">
           <div className="text-right">
@@ -178,7 +178,7 @@ const handleCallChange = (e) => {
       {showReportModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
-            <h2 className="text-xl font-semibold text-blue-600 mb-4 text-center">
+            <h2 className="text-xl font-semibold text-zinc-600 mb-4 text-center">
               Report Complaint
             </h2>
 

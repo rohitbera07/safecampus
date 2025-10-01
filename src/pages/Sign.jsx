@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
-
+import logo from "../assets/logo.png";
 const variants = {
   initial: { opacity: 0, y: 50 },
   animate: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 200, damping: 20 } },
@@ -73,7 +73,10 @@ const Sign = () => {
   const stepCount = 4;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-100 via-blue-200 to-gray-300 p-4">
+    <div className="min-h-screen flex items-center gap-16 justify-center bg-gradient-to-br from-zinc-100 via-zinc-200 to-gray-300 p-4">
+      <div className="mb-4">
+                    <img src={logo} alt="" className="w-[250px] h-[250px] mx-2"/>
+                  </div>
       <Toaster position="top-center" />
       <div className="w-full max-w-lg bg-white rounded-xl p-8 shadow-2xl overflow-hidden relative">
         <AnimatePresence mode="wait">
@@ -86,13 +89,13 @@ const Sign = () => {
           >
             {step===0 && (
               <div className="text-center space-y-4 pt-12">
-                <h2 className="text-3xl font-bold text-blue-600">Welcome aboard</h2>
+                <h2 className="text-3xl font-bold text-zinc-600">Welcome aboard</h2>
                 <p>Select your role to begin</p>
                 <select
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="w-full mt-4 px-4 py-2 border rounded-md focus:ring-purple-400"
+                  className="w-full mt-4 px-4 py-2 border rounded-md focus:ring-zinc-400"
                 >
                   <option value="">--Role--</option>
                   <option value="student">Student</option>
@@ -121,18 +124,18 @@ const Sign = () => {
             )}
             {step===3 && (
               <div className="text-center space-y-4 pt-12">
-                <h2 className="text-2xl font-bold text-purple-600">All set!</h2>
+                <h2 className="text-2xl font-bold text-zinc-600">All set!</h2>
                 <p>Click submit to complete signup.</p>
                 <button
                   onClick={submit}
                   disabled={loading}
-                  className="w-full py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
+                  className="w-full py-2 bg-zinc-600 text-white rounded-md hover:bg-zinc-700 disabled:opacity-50"
                 >
                   {loading ? "Submitting..." : "Submit"}
                 </button>
                 <p className="mt-4 text-sm">
                   Already have an account?{" "}
-                  <span onClick={()=>navigate('/login')} className="text-purple-600 hover:underline cursor-pointer">
+                  <span onClick={()=>navigate('/login')} className="text-zinc-600 hover:underline cursor-pointer">
                     Login here
                   </span>
                 </p>
@@ -143,7 +146,7 @@ const Sign = () => {
 
         <div className="flex justify-between mt-8">
           {step > 0 && <button onClick={back} className="text-gray-600 hover:text-gray-800">← Back</button>}
-          {step < stepCount - 1 && <button onClick={next} className="ml-auto text-purple-600 hover:text-purple-800">Next →</button>}
+          {step < stepCount - 1 && <button onClick={next} className="ml-auto text-zinc-600 hover:text-zinc-800">Next →</button>}
         </div>
       </div>
     </div>
