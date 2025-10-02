@@ -205,3 +205,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+//cd path/to/your/folder
+// rm -rf .git

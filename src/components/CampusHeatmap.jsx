@@ -1,96 +1,152 @@
-import React, { useEffect } from "react";
-import mapImage from "../assets/map1.jpeg"; // put map1.jpeg inside src/assets
+import React, { useEffect, useRef, useState } from "react";
+import floor1 from "../assets/floor1.jpeg";
+import floor2 from "../assets/floor2.jpeg";
+import floor3 from "../assets/floor3.jpeg";
+// Floor maps & coordinates
+const floorMaps = {
+  floor1: {
+    src: floor1,
+    width: 720,
+    height: 720,
+    areas: [
+      { name: "canteen", coords: "202,28,477,109", shape: "rect" },
+      { name: "siting area", coords: "205,133,471,323", shape: "rect" },
+      { name: "office", coords: "317,376,470,583", shape: "rect" },
+      { name: "admin office", coords: "202,492,46,413", shape: "rect" },
+      { name: "workshop", coords: "47,505,202,579", shape: "rect" },
+      { name: "playground", coords: "548,43,685,668", shape: "rect" },
+    ],
+  },
+  floor2: {
+    src: floor2,
+    width: 1280,
+    height: 1280,
+    areas: [
+      { name: "library", coords: "389,1053,1226,1257", shape: "rect" },
+      { name: "room 101", coords: "1038,21,1231,224", shape: "rect" },
+      { name: "room 102", coords: "1039,259,1233,466", shape: "rect" },
+      { name: "room 103", coords: "1034,506,1240,713", shape: "rect" },
+      { name: "room 104", coords: "1037,749,1240,992", shape: "rect" },
+      { name: "room 105", coords: "381,692,590,891", shape: "rect" },
+      { name: "ladies washroom 1", coords: "385,423,590,501", shape: "rect" },
+      { name: "gents washroom 1", coords: "389,164,590,243", shape: "rect" },
+      { name: "exam cell", coords: "385,522,589,663", shape: "rect" },
+    ],
+  },
+  floor3: {
+    src: floor3,
+    width: 1280,
+    height: 1280,
+    areas: [
+      { name: "room 201", coords: "1238,228,1037,21", shape: "rect" },
+      { name: "room 202", coords: "1034,264,1237,463", shape: "rect" },
+      { name: "room 203", coords: "1031,744,1239,985", shape: "rect" },
+      { name: "seminar hall", coords: "1033,506,1231,705", shape: "rect" },
+      { name: "laboratory", coords: "386,1054,1229,1250", shape: "rect" },
+      { name: "second floor corridor", coords: "704,120,970,938", shape: "rect" },
+    ],
+  },
+};
 
-const complaintData = [
-  { name: "room108", x: 134, y: 46, complaints: 2 },
-  { name: "room107", x: 160, y: 178, complaints: 5 },
-  { name: "room106", x: 136, y: 250, complaints: 0 },
-  { name: "room105", x: 253, y: 379, complaints: 7 },
-  { name: "room101", x: 341, y: 66, complaints: 1 },
-  { name: "room103", x: 347, y: 177, complaints: 3 },
-  { name: "room104", x: 346, y: 267, complaints: 6 },
-  { name: "room102", x: 355, y: 116, complaints: 0 },
-];
+// Sample complaint data
+const complaintData = {
+  "canteen": 1,"siting area": 3,"office": 2,"admin office": 0,"workshop": 1,"playground": 3,
+  "library": 2,"room 101": 0,"room 102": 1,"room 103": 2,"room 104": 3,"room 105": 1,
+  "ladies washroom 1": 0,"gents washroom 1": 1,"exam cell": 2,
+  "room 201": 1,"room 202": 2,"room 203": 3,"seminar hall": 2,"laboratory": 1,"second floor corridor": 1
+};
+
+const getColor = (count) => {
+  if(count === 1) return "yellow";
+  if(count === 2) return "orange";
+  if(count >= 3) return "red";
+  return "transparent";
+};
 
 const CampusHeatmap = () => {
+  const containerRef = useRef(null);
+  const svgRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const [currentFloor, setCurrentFloor] = useState("floor1");
+  const [zoom, setZoom] = useState(1);
+
+  // Draw polygons
   useEffect(() => {
-    const container = document.getElementById("map-container");
-    const tooltip = document.getElementById("tooltip");
+    const svg = svgRef.current;
+    svg.innerHTML = "";
+    const img = containerRef.current.querySelector("img");
+    const { width: imgWidth, height: imgHeight } = img.getBoundingClientRect();
 
-    function getColor(count) {
-      if (count === 0) return "rgba(0,200,0,0.4)"; // green
-      else if (count < 5) return "rgba(255,165,0,0.6)"; // orange
-      else return "rgba(255,0,0,0.6)"; // red
-    }
+    const floorData = floorMaps[currentFloor];
+    const scaleX = imgWidth / floorData.width;
+    const scaleY = imgHeight / floorData.height;
 
-    complaintData.forEach((zone) => {
-      if (zone.complaints > 0) {
-        const circle = document.createElement("div");
-        circle.className = "heat-circle";
-        circle.style.left = `${zone.x}px`;
-        circle.style.top = `${zone.y}px`;
-        circle.style.backgroundColor = getColor(zone.complaints);
-
-        circle.addEventListener("mouseover", () => {
-          tooltip.style.opacity = 1;
-          tooltip.textContent = `📍 ${zone.name} — ${zone.complaints} Complaints`;
-        });
-
-        circle.addEventListener("mousemove", (e) => {
-  const rect = container.getBoundingClientRect(); // container position
-  tooltip.style.left = e.clientX - rect.left + 10 + "px";
-  tooltip.style.top = e.clientY - rect.top - 10 + "px";
-});
-
-
-        circle.addEventListener("mouseleave", () => {
-          tooltip.style.opacity = 0;
-        });
-
-        container.appendChild(circle);
+    floorData.areas.forEach(area => {
+      const coords = area.coords.split(",").map(Number);
+      let points = "";
+      if(area.shape === "rect") {
+        points = `${coords[0]*scaleX},${coords[1]*scaleY} ${coords[2]*scaleX},${coords[1]*scaleY} ${coords[2]*scaleX},${coords[3]*scaleY} ${coords[0]*scaleX},${coords[3]*scaleY}`;
       }
+
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      poly.setAttribute("points", points);
+      poly.setAttribute("fill", getColor(complaintData[area.name]));
+      poly.setAttribute("fill-opacity", "0.4");
+      poly.setAttribute("stroke", "#000");
+      poly.setAttribute("stroke-width", "1");
+      poly.style.cursor = "pointer";
+
+      poly.addEventListener("mouseenter", () => {
+        tooltipRef.current.style.display = "block";
+        tooltipRef.current.innerHTML = `<b>${area.name}</b><br/>Complaints: ${complaintData[area.name] || 0}`;
+      });
+      poly.addEventListener("mousemove", (e) => {
+        const rect = containerRef.current.getBoundingClientRect();
+        tooltipRef.current.style.left = e.clientX - rect.left + 10 + "px";
+        tooltipRef.current.style.top = e.clientY - rect.top + 10 + "px";
+      });
+      poly.addEventListener("mouseleave", () => {
+        tooltipRef.current.style.display = "none";
+      });
+
+      svg.appendChild(poly);
     });
-  }, []);
+  }, [currentFloor, zoom]);
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-3">Campus Complaints Heatmap</h2>
-      <div
-        id="map-container"
-        style={{
-          position: "relative",
-          display: "inline-block",
-          width: "400px",
-          height: "500px",
-        }}
-      >
-        <img
-          id="campus-map"
-          src={mapImage}
-          alt="Campus Map"
-          style={{
-            maxWidth: "100%",
-            height: "auto",
-            border: "2px solid #ccc",
-            borderRadius: "10px",
-          }}
-        />
-        <div
-          id="tooltip"
-          style={{
-            position: "absolute",
-            background: "#1e293b",
-            color: "#fff",
-            padding: "6px 10px",
-            borderRadius: "5px",
-            fontSize: "14px",
-            whiteSpace: "nowrap",
-            pointerEvents: "none",
-            opacity: 0,
-            transition: "opacity 0.2s",
-            zIndex: 999,
-          }}
-        ></div>
+    <div className="w-full max-w-5xl mx-auto p-4 bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Campus Complaints Heatmap</h2>
+        <select
+          className="border rounded-md p-2"
+          value={currentFloor}
+          onChange={(e) => setCurrentFloor(e.target.value)}
+        >
+          <option value="floor1">Floor 1</option>
+          <option value="floor2">Floor 2</option>
+          <option value="floor3">Floor 3</option>
+        </select>
+      </div>
+
+      <div className="relative overflow-hidden border rounded-lg mx-auto" style={{ width: "100%", transform: `scale(${zoom})`, transformOrigin: "center center" }} ref={containerRef}>
+        <img src={floorMaps[currentFloor].src} alt="Floor Map" className="w-full h-auto block mx-auto" />
+        <svg ref={svgRef} className="absolute top-0 left-0 w-full h-full pointer-events-auto"></svg>
+        <div ref={tooltipRef} className="absolute bg-slate-800 text-white p-2 rounded-md text-sm pointer-events-none hidden z-10"></div>
+      </div>
+
+      <div className="flex justify-center mt-4 space-x-2">
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
+        >
+          +
+        </button>
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
+        >
+          -
+        </button>
       </div>
     </div>
   );

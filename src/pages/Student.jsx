@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from "react";
 import CampusHeatmap from "../components/CampusHeatmap";
 
+// shadcn components
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
 export default function StudentDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
- const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+
   // Report form state
   const [reportData, setReportData] = useState({
     description: "",
-    area: "",
+    location: "",
+    image: null,
   });
 
   // Call form state
@@ -17,8 +30,31 @@ export default function StudentDashboard() {
     area: "",
   });
 
-  // Profile (from login response stored in localStorage)
- 
+  // Location options
+  const locationOptions = [
+    "library",
+    "canteen",
+    "admin office",
+    "playground",
+    "workshop",
+    "sitting area",
+    "laboratory",
+    "room no.101",
+    "room no.102",
+    "room no.103",
+    "room no.104",
+    "room no.105",
+    "room no.201",
+    "room no.202",
+    "room no.203",
+    "room no.204",
+    "room no.205",
+    "ladies washroom",
+    "gents washroom",
+    "stairs",
+    "first floor corridor",
+    "second floor corridor",
+  ];
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -27,32 +63,44 @@ export default function StudentDashboard() {
     }
   }, []);
 
-  // Handle changes
+  // Handle text inputs
   const handleReportChange = (e) => {
-    setReportData({ ...reportData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setReportData({ ...reportData, [name]: value });
   };
-const handleCallChange = (e) => {
-  const { name, value } = e.target;
-  setSosData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
+
+  const handleImageChange = (e) => {
+    setReportData({ ...reportData, image: e.target.files[0] });
+  };
+
+  const handleCallChange = (e) => {
+    const { name, value } = e.target;
+    setSosData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   // Submit Report Complaint
   const handleReportSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append("description", reportData.description);
+      formData.append("location", reportData.location);
+      formData.append("email", localStorage.email);
+      formData.append("image", reportData.image);
+
       const res = await fetch("http://localhost:5000/reports", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...reportData, email: localStorage.email }),
+        body: formData,
       });
 
       const data = await res.json();
       if (res.ok) {
         alert("Report submitted successfully!");
         setShowReportModal(false);
-        setReportData({ description: "", area: "" });
+        setReportData({ description: "", location: "", image: null });
       } else {
         alert(data.message);
       }
@@ -62,47 +110,44 @@ const handleCallChange = (e) => {
     }
   };
 
-  // Submit Voice Call Request
+  // Submit SOS
   const handleSOSSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
+        try {
+          const res = await fetch("http://localhost:5000/sos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: localStorage.name,
+              description: sosData.description,
+              area: sosData.area,
+              latitude,
+              longitude,
+            }),
+          });
 
-      try {
-        const res = await fetch("http://localhost:5000/sos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: localStorage.name,      // from localStorage
-            description: sosData.description,
-            area: sosData.area,
-            latitude,
-            longitude,
-          }),
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          alert("🚨 SOS sent successfully!");
-          setSosData({ description: "", area: "" }); // for call form
-          setShowCallModal(false); // close call modal
-
-        } else {
-          alert(data.error || "Failed to send SOS");
+          const data = await res.json();
+          if (res.ok) {
+            alert("🚨 SOS sent successfully!");
+            setSosData({ description: "", area: "" });
+            setShowCallModal(false);
+          } else {
+            alert(data.error || "Failed to send SOS");
+          }
+        } catch (error) {
+          console.error(error);
+          alert("Something went wrong!");
         }
-      } catch (error) {
-        console.error(error);
-        alert("Something went wrong!");
-      }
-    });
-  } else {
-    alert("Geolocation is not supported by this browser.");
-  }
-};
-
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
@@ -120,59 +165,39 @@ const handleCallChange = (e) => {
         </div>
       </header>
 
-      {/* Cards Section */}
+      {/* Cards */}
       <div className="grid md:grid-cols-2 gap-6 mt-6">
-        {/* Report Complaints */}
+        {/* Report */}
         <div className="bg-gray-100 rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Report Complaints</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Quickly send emergency alerts to your trusted contacts with a single
-            button press. Ensure your safety by notifying them of your location
-            and situation.
+            Submit safety complaints with description, location, and image proof.
           </p>
-          <button
-            onClick={() => setShowReportModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Report
-          </button>
+          <Button onClick={() => setShowReportModal(true)}>Report</Button>
         </div>
 
-        {/* Voice Calls */}
+        {/* SOS */}
         <div className="bg-gray-100 rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold mb-2">SOS</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Initiate voice calls with your contacts directly from the app for
-            immediate communication in urgent situations.
+            Quickly send SOS alerts with your location.
           </p>
-          <button
-            onClick={() => setShowCallModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            SOS
-          </button>
+          <Button onClick={() => setShowCallModal(true)}>SOS</Button>
         </div>
       </div>
 
-      {/* Map View */}
-    <div className="bg-gray-100 rounded-xl shadow p-6 mt-6">
-      <h2 className="text-lg font-semibold mb-4">Map View</h2>
-
-      {/* Button to toggle map */}
-      <button
-        onClick={() => setShowMap(!showMap)}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-      >
-        {showMap ? "Hide Map" : "Show Map"}
-      </button>
-
-      {/* Conditional rendering */}
-      {showMap && (
-        <div className="mt-4">
-          <CampusHeatmap />
-        </div>
-      )}
-    </div>
+      {/* Map */}
+      <div className="bg-gray-100 rounded-xl shadow p-6 mt-6">
+        <h2 className="text-lg font-semibold mb-4">Map View</h2>
+        <Button onClick={() => setShowMap(!showMap)}>
+          {showMap ? "Hide Map" : "Show Map"}
+        </Button>
+        {showMap && (
+          <div className="mt-4">
+            <CampusHeatmap />
+          </div>
+        )}
+      </div>
 
       {/* Report Modal */}
       {showReportModal && (
@@ -181,8 +206,8 @@ const handleCallChange = (e) => {
             <h2 className="text-xl font-semibold text-zinc-600 mb-4 text-center">
               Report Complaint
             </h2>
-
             <form onSubmit={handleReportSubmit} className="space-y-4">
+              {/* Description */}
               <div>
                 <label className="block text-gray-700 mb-1">Description</label>
                 <textarea
@@ -195,46 +220,66 @@ const handleCallChange = (e) => {
                 />
               </div>
 
+              {/* Location Combobox */}
               <div>
-                <label className="block text-gray-700 mb-1">Area</label>
-                <input
-                  type="text"
-                  name="area"
-                  value={reportData.area}
-                  onChange={handleReportChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-                  required
-                />
+                <label className="block text-gray-700 mb-1">Location</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !reportData.location && "text-muted-foreground"
+                      )}
+                    >
+                      {reportData.location || "Select a location"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search location..." />
+                      <CommandEmpty>No results found.</CommandEmpty>
+                      <CommandGroup>
+                        {locationOptions.map((loc) => (
+                          <CommandItem
+                            key={loc}
+                            onSelect={() =>
+                              setReportData({ ...reportData, location: loc })
+                            }
+                          >
+                            {loc}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-gray-700 mb-1">Upload Image</label>
+                <Input type="file" accept="image/*" onChange={handleImageChange} required />
               </div>
 
               <div className="flex justify-between mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowReportModal(false)}
-                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-                >
+                <Button type="button" variant="outline" onClick={() => setShowReportModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Submit Report
-                </button>
+                </Button>
+                <Button type="submit">Submit Report</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Voice Call Modal */}
+      {/* SOS Modal */}
       {showCallModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl">
             <h2 className="text-xl font-semibold text-blue-600 mb-4 text-center">
-              Make a Call
+              Send SOS
             </h2>
-
             <form onSubmit={handleSOSSubmit} className="space-y-4">
               <div>
                 <label className="block text-gray-700 mb-1">Description</label>
@@ -247,39 +292,26 @@ const handleCallChange = (e) => {
                   required
                 />
               </div>
-
               <div>
                 <label className="block text-gray-700 mb-1">Area</label>
-                <input
+                <Input
                   type="text"
                   name="area"
                   value={sosData.area}
                   onChange={handleCallChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                   required
                 />
               </div>
-
               <div className="flex justify-between mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowCallModal(false)}
-                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-                >
+                <Button type="button" variant="outline" onClick={() => setShowCallModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Initiate Call
-                </button>
+                </Button>
+                <Button type="submit">Send SOS</Button>
               </div>
             </form>
           </div>
         </div>
       )}
-        
     </div>
   );
 }
