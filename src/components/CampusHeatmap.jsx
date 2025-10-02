@@ -23,7 +23,7 @@ const floorMaps = {
     height: 1280,
     areas: [
       { name: "library", coords: "389,1053,1226,1257", shape: "rect" },
-      { name: "room 101", coords: "1038,21,1231,224", shape: "rect" },
+      { name: "room no.101", coords: "1038,21,1231,224", shape: "rect" },
       { name: "room 102", coords: "1039,259,1233,466", shape: "rect" },
       { name: "room 103", coords: "1034,506,1240,713", shape: "rect" },
       { name: "room 104", coords: "1037,749,1240,992", shape: "rect" },
@@ -49,12 +49,24 @@ const floorMaps = {
 };
 
 // Sample complaint data
-const complaintData = {
-  "canteen": 1,"siting area": 3,"office": 2,"admin office": 0,"workshop": 1,"playground": 3,
-  "library": 2,"room 101": 0,"room 102": 1,"room 103": 2,"room 104": 3,"room 105": 1,
-  "ladies washroom 1": 0,"gents washroom 1": 1,"exam cell": 2,
-  "room 201": 1,"room 202": 2,"room 203": 3,"seminar hall": 2,"laboratory": 1,"second floor corridor": 1
-};
+let complaintData = {}; // global variable
+
+async function fetchComplaints() {
+  try {
+    const res = await fetch("http://localhost:5000/reports/api/complaints");
+    complaintData = await res.json();
+    console.log("Fetched complaintData:", complaintData);
+
+    // Now you can use complaintData for heatmap or risk visualization
+  
+  } catch (err) {
+    console.error("Error fetching complaints:", err);
+  }
+}
+
+// Call on page load
+fetchComplaints();
+
 
 const getColor = (count) => {
   if(count === 1) return "yellow";

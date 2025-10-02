@@ -5,7 +5,7 @@ import side from "../assets/side.png";
 import { Link } from 'react-router-dom';
 export default function Hero() {
   return (
-    <div className="w-screen flex flex-col md:flex-row min-h-screen">
+    <div className="w-screen flex items-center flex-col md:flex-row min-h-screen">
       {/* Left Text Section */}
       <section className="relative md:w-[50vw] h-full flex flex-col justify-center items-center ">
         

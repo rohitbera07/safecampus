@@ -6,13 +6,21 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import CampusHeatmap from "../components/CampusHeatmap";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { User, LogOut, MoreHorizontal, AlertTriangle } from "lucide-react";
+import UserMenu from "../components/UserMenu";
 
 const SEVERITY_NORMALIZED = (s) => {
   if (!s) return "Minor";
@@ -23,6 +31,7 @@ const SEVERITY_NORMALIZED = (s) => {
 };
 
 export default function AdminDashboard() {
+  const [showMap, setShowMap] = useState(false);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -82,6 +91,26 @@ export default function AdminDashboard() {
     setReports((prev) => prev.filter((r) => r.id !== id));
   };
 
+  const resolveReport = async (id) => {
+    try {
+      console.log("Resolving report with id:", id);
+      const res = await fetch(`http://localhost:5000/reports/${id}/resolve`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      console.log("Resolve response:", data);
+      if (!res.ok) throw new Error(data.message || "Failed to resolve report");
+
+      setReports((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: "Resolved" } : r))
+      );
+    } catch (err) {
+      console.error("Error resolving report:", err);
+      alert("Failed to resolve report");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-6xl mx-auto">
@@ -100,25 +129,8 @@ export default function AdminDashboard() {
               />
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar>
-                  <AvatarImage src="/avatars/admin.jpg" alt="Admin" />
-                  <AvatarFallback>AU</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setProfileOpen(true)}>
-                  <User className="mr-2 h-4 w-4" /> Show profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" /> Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserMenu />
 
-            {/* small-screen search */}
             <div className="md:hidden w-40">
               <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
@@ -160,7 +172,10 @@ export default function AdminDashboard() {
                 <div className="p-6 text-center text-slate-500">No reports match your filters.</div>
               ) : (
                 filtered.map((r) => (
-                  <div key={r.id} className="py-4">
+                  <div
+                    key={r.id}
+                    className={`py-4 ${r.status === "Resolved" ? "opacity-50" : ""}`}
+                  >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-slate-900">{r.location}</h3>
@@ -169,18 +184,22 @@ export default function AdminDashboard() {
                           <img
                             src={r.image}
                             alt="Report"
-                            className="mt-2 max-h-60 w-full object-cover rounded-md"
+                            className="mt-2 w-full max-h-60 object-contain rounded-md"
                           />
                         )}
                         <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
                           <span>📧 {r.email}</span>
                           <Separator orientation="vertical" className="h-4" />
-                          <span>⏱ {r.timeAgo || r.createdAt || ''}</span>
+                          <span>⏱ {r.timeAgo || r.createdAt || ""}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <Badge className="capitalize">{r.severity}</Badge>
+                        <Badge className="capitalize mr-2">{r.severity}</Badge>
+                        <Badge className="capitalize mr-2"> Authenticity level : {r.authenticity}</Badge>
+                        {r.status === "Resolved" && (
+                          <Badge variant="outline" className="text-green-600">Resolved</Badge>
+                        )}
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -189,6 +208,11 @@ export default function AdminDashboard() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
+                            {r.status !== "Resolved" && (
+                              <DropdownMenuItem onClick={() => resolveReport(r.id)}>
+                                Resolve
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => deleteReport(r.id)}>Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -199,11 +223,23 @@ export default function AdminDashboard() {
               )}
             </div>
           </CardContent>
-          <CardFooter className="text-sm text-slate-500">Tip: Click a tab to filter by severity or use search to find reports quickly.</CardFooter>
+          <CardFooter className="text-sm text-slate-500">
+            Tip: Click a tab to filter by severity or use search to find reports quickly.
+          </CardFooter>
         </Card>
+      </div>
+
+      <div className="bg-gray-100 rounded-xl shadow p-6 mt-6">
+        <h2 className="text-lg font-semibold mb-4">Map View</h2>
+        <Button onClick={() => setShowMap(!showMap)}>
+          {showMap ? "Hide Map" : "Show Map"}
+        </Button>
+        {showMap && (
+          <div className="mt-4">
+            <CampusHeatmap />
+          </div>
+        )}
       </div>
     </div>
   );
 }
-//cd path/to/your/folder
-// rm -rf .git

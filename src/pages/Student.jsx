@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import UserMenu from "../components/UserMenu";
 
 export default function StudentDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
@@ -92,9 +93,13 @@ export default function StudentDashboard() {
       formData.append("image", reportData.image);
 
       const res = await fetch("http://localhost:5000/reports", {
-        method: "POST",
-        body: formData,
-      });
+  method: "POST",
+  body: formData,
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+});
+
 
       const data = await res.json();
       if (res.ok) {
@@ -159,9 +164,7 @@ export default function StudentDashboard() {
             <p className="font-semibold">{localStorage.name}</p>
             <p className="text-sm">{localStorage.role}</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold shadow">
-            {localStorage.name ? localStorage.name[0].toUpperCase() : "U"}
-          </div>
+         <UserMenu/>
         </div>
       </header>
 
